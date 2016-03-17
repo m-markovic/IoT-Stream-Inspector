@@ -1,0 +1,6 @@
+REGISTER QUERY myquery AS
+SELECT ?s ?p ?o
+FROM STREAM <http://iotstreams> [RANGE 2m TUMBLING]
+WHERE {
+  ?s ?p ?o
+}

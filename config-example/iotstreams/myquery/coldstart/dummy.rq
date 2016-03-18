@@ -1,5 +1,3 @@
-PREFIX dc: <http://purl.org/dc/elements/1.1/>
 INSERT DATA
-{ <http://example/book3> dc:title    "A new book" ;
-                         dc:creator  "A.N.Other" .
+{ <http://example> <http://triple> "coldstart"
 }

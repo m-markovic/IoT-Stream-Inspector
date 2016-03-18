@@ -16,7 +16,41 @@ mvn install
 cd ../IoT-Stream-Inspector
 ```
 
-## Configuration
+## Building
+
+```
+mvn clean package
+```
+
+## Running the example application
+
+```
+mvn package && java -jar target/iotstreams-jar-with-dependencies.jar
+```
+
+## Creating an Eclipse project
+
+If you would like to edit this project in Eclipse, we recommend you create a project file before starting Eclipse, like this:
+```
+mvn eclipse:clean eclipse:eclipse
+```
+
+## Making your own configuration
+
+### Live or recorded data?
+
+In the project root, the file ```csparql.properties``` contains the setting
+```
+esper.externaltime.enabled=true
+```
+When the value is ```true```, C-SPARQL will make windows based on timestamps
+in the data. When the values is ```false```, C-SPARQL will make windows
+based on the system's current time when data was put on the stream.
+
+Keep the values as ```true``` if you intend to use recorded data.
+Set the value to ```false``` if you wish to stream live data.
+
+### Queries, updates and ontologies
 
 All data and configuration must reside in the ```config/iotstreams``` directory. To get started, copy the example configuration:
 ```
@@ -40,33 +74,21 @@ config/
   |     |-- <any name>  ... any number of these ...
 ```
 
-## Building
+## Provide your own data from Java
 
+To provide recorded data, make sure 
+```esper.externaltime.enabled=true
 ```
-mvn clean package
+(see above) then follow this pattern:
 ```
-
-## Running
-
+final IotStreamsEngine engine = IotStreamsEngine.forRecordedData(m -> m.write(System.out, "N3"));
+//For each data point:
+final ZonedDateTime t = ZonedDateTime.parse("2007-12-03T10:15:30+01:00[Europe/Paris]");
+engine.apply(t).accept(parseN3("<http://example> <http://answer> 42"));
 ```
-mvn package && java -jar target/iotstreams-jar-with-dependencies.jar
-```
+The full example can be seen in ```src/main/java/uk/ac/abdn/iotstreams/ExampleMain.java```
 
-## Creating an Eclipse project
-
-If you would like to edit this project in Eclipse, we recommend you create a project file before starting Eclipse, like this:
-```
-mvn eclipse:clean eclipse:eclipse
-```
-
-## Using live data
-
-TODO: Revise and expand
-
-To run the IotStreams engine with live data you will need to
-  * Change ```csparql.properties```, setting ```esper.externaltime.enabled``` to ```false```.
-  * Write Java code that constructs an instance of ```uk.ac.abdn.iotstreams.csparql.IotStreamsEngine``` (call this ```engine```)
-  * Write Java code that encodes live data as SSN in a Jena ```Model``` (call this ```model```) and adds the data like this: ```engine.apply(ZonedDateTime.now()).accept(model)```. 
+TODO: Live data example
 
 ## Run static analyses
 

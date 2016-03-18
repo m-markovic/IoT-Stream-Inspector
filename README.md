@@ -76,9 +76,31 @@ config/
 
 ## Provide your own data from Java
 
-To provide recorded data, make sure 
+Your code should first create an instance ```engine``` of ```uk.ac.abdn.iotstreams.csparql.IotStreamsEngine```. This will read the configuration in ```config/iotstreams``` and set itself up accordingly.
+
+For every set of data to put on the stream, your code must encode
+that data in a Jena Model ```m``` and then either call
+```
+engine.accept(m);
+```
+if the triples in ```m``` should be associated with current system time,
+or
+```
+engine.apply(...timestamp...).accept(model)
+```
+to set a specific time stamp.
+
+Below are examples of use with recorded or live data.
+The full examples can be seen in ```src/main/java/uk/ac/abdn/iotstreams/ExampleMain.java```
+
+### Recorded (non-live) data
+
+When using recorded data, you will likely want to provide
+the original time stamps and make C-SPARQL use these for
+making time windows. First make sure 
 ```esper.externaltime.enabled=true
 ```
+in ``` csparql.properties ```
 (see above) then follow this pattern:
 ```
 final IotStreamsEngine engine = IotStreamsEngine.forRecordedData(m -> m.write(System.out, "N3"));
@@ -86,9 +108,23 @@ final IotStreamsEngine engine = IotStreamsEngine.forRecordedData(m -> m.write(Sy
 final ZonedDateTime t = ZonedDateTime.parse("2007-12-03T10:15:30+01:00[Europe/Paris]");
 engine.apply(t).accept(parseN3("<http://example> <http://answer> 42"));
 ```
-The full example can be seen in ```src/main/java/uk/ac/abdn/iotstreams/ExampleMain.java```
 
-TODO: Live data example
+### Live data
+
+When using live data, you will likely want to use current time
+and allow C-SPARQL to use this for
+making time windows. First make sure 
+```esper.externaltime.enabled=false
+```
+in ``` csparql.properties ```
+(see above) then follow this pattern:
+```
+final IotStreamsEngine engine = IotStreamsEngine.forLiveData(m -> m.write(System.out, "N3"));
+//Whenever you receive a reading:
+Model m = ModelFactory.createDefaultModel();
+m.add(...data as triples...);//As many of these as you need...
+engine.accept(m);
+```
 
 ## Run static analyses
 

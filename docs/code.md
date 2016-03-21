@@ -3,7 +3,7 @@
 As part of the FoodSafety project we developed a more general system
 to simplify inference over streams of IoT data
 modelled in the semantic web framework.
-The system is written in Java and it builds on Apache Jena andC-SPARQL.
+The system is written in Java and it builds on Apache Jena and C-SPARQL.
 The code is available from
 > https://github.com/m-markovic/IoT-Stream-Inspector/
 
@@ -12,6 +12,7 @@ The code is available from
 The following diagram illustrates the data flow
 of the IoT-Streams Inspector:
 ![Data flow](https://github.com/m-markovic/IoT-Stream-Inspector/raw/master/docs/run-diagram.png "Data flow")
+
 The project-specific code continually receives data from 
 the IoT devices and passes this data on to an ```IotStreamsEngine``` 
 in the form of a Apache Jena model.
@@ -28,6 +29,7 @@ where they may be stored persistently and/or acted upon.
 
 Here's a Java example of how you would create
 an instance of ```IotStreamsEngine```:
+
 ```java
 IotStreamsEngine engine = 
     IotStreamsEngine.forLiveData(
@@ -41,10 +43,12 @@ in the terminal running your code.
 
 Whenever your code receives data from an IoT device,
 use the ```accept``` method to pass it on to the ```IotStreamsEngine```:
+
 ```java
 Model model = <Jena model of the data>;
 engine.accept(model);
 ```
+
 Successful inference will cause the callback above
 (```m -> m.write(System.out, "N3")```)
 to be activated.
@@ -67,6 +71,7 @@ along with
 The configuration format is illustrated in the below diagram.
 More detailed documentation is available on GitHub along
 with a full example configuration.
+
 ![Setting up your inference](https://github.com/m-markovic/IoT-Stream-Inspector/raw/master/docs/config-diagram.png "Setting up your inference")
 
 ## Coldstart inference and warm inference explained
@@ -79,6 +84,7 @@ in a graph that contains
   * The ontology
   * The new window of query results
   * The previous state (if one exists)
+
 If any new triples are added by the SPARQL update queries,
 these will make up the new state.
 
@@ -92,3 +98,7 @@ When the updates finally add new triple to a graph,
 these triples will become the first inferred state for the
 C-SPARQL query, and all subsequent result windows emitted
 by the query will be handled by the "warm" SPARQL update queries.
+Ever time new triples are added by SPARQL qupte queries - coldstart
+or warm - the triples will be passed to the project-specific Java
+for persistent storage and/or appropriate action.
+

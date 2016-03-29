@@ -76,6 +76,10 @@ config/
   |     |-- <any name>  ... any number of these ...
 ```
 
+**Note**: Blank nodes are not allowed.
+This limitation applies to the data input from Java (see below)
+as well as the output from C-SPARQL queries.
+
 ## Provide your own data from Java
 
 Your code should first create an instance ```engine``` of ```uk.ac.abdn.iotstreams.csparql.IotStreamsEngine```. This will read the configuration in ```config/iotstreams``` and set itself up accordingly.
@@ -91,6 +95,12 @@ or
 engine.apply(...timestamp...).accept(model)
 ```
 to set a specific time stamp.
+
+*Remark*: Your program may construct any number of instances of 
+```uk.ac.abdn.iotstreams.csparql.IotStreamsEngine```
+(although this has not been tested).
+The instances will use the same configuration files but but will be
+completely independt wrt. the data your program provides to each of them.
 
 Below are examples of use with recorded or live data.
 The full examples can be seen in ```src/main/java/uk/ac/abdn/iotstreams/ExampleMain.java```
@@ -128,6 +138,29 @@ final IotStreamsEngine engine = IotStreamsEngine.forLiveData(m -> m.write(System
 Model m = ModelFactory.createDefaultModel();
 m.add(...data as triples...);//As many of these as you need...
 engine.accept(m);
+```
+
+### Handling the inferred triples
+
+The parameter passed to ```IotStreamsEngine.forLiveData```/```IotStreamsEngine.forRecordedData``` is a callback function that is called whenever
+new triples are inferred. In the above examples, we used
+```
+m -> m.write(System.out, "N3")
+```
+which is a handy lambda notation for implementing a ```Consumer<Model>```.
+
+You may also implement a ```Consumer<Model>``` in a more classic way:
+```
+class MyAction implements Consumer<Model> {
+    public void accept(Model inferredTriples) {
+        ... do stufff with inferredTriples, which is a Jena Model ...
+    }
+}
+```
+You can then pass ```MyAction``` objects like this:
+```
+MyAction action = new MyAction();
+IotStreamsEngine engine = IotStreamsEngine.forRecordedData(action);
 ```
 
 ## Technical notes

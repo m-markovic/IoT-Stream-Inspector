@@ -61,14 +61,14 @@ Now add/remove/update files to reflect your configuration. The structure is like
 ```
 config/
   |-- iotstreams/
-  |     |-- <any name>  Set up one C-SPARQL query along with the associated provenance inference
+  |     |-- <any name>  Set up one C-SPARQL query along with the associated  inference
   |     |     |-- csparql-query.rq  Query for C-SPARQL
   |     |     |-- init.ttl          Ontology to initialize models with
   |     |     |-- coldstart/
-  |     |     |     |-- <any name>.rq  SPARQL update to execute when no previous provenance is present 
+  |     |     |     |-- <any name>.rq  SPARQL update to execute when no previous infefence has been made 
   |     |     |     |-- <any name>.rq  ... any number of these ... 
   |     |     |-- warm/
-  |     |           |-- <any name>.rq  SPARQL update to execute when previous provenance is present 
+  |     |           |-- <any name>.rq  SPARQL update to execute when previous infefence has been made  
   |     |           |-- <any name>.rq  ... any number of these ...
   |     |
   |     |-- <any name>  ... any number of these ...

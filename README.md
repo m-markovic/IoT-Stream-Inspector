@@ -25,6 +25,7 @@ mvn clean package
 ## Running the example application
 
 ```
+cp -r config-example/ config
 mvn package && java -jar target/iotstreams-jar-with-dependencies.jar
 ```
 
@@ -44,8 +45,9 @@ In the project root, the file ```csparql.properties``` contains the setting
 esper.externaltime.enabled=true
 ```
 When the value is ```true```, C-SPARQL will make windows based on timestamps
-in the data. When the values is ```false```, C-SPARQL will make windows
+in the data. When the value is ```false```, C-SPARQL will make windows
 based on the system's current time when data was put on the stream.
+It seems that C-SPARQL will ignore provided timestamps when the value is false.
 
 Keep the values as ```true``` if you intend to use recorded data.
 Set the value to ```false``` if you wish to stream live data.
@@ -128,7 +130,25 @@ m.add(...data as triples...);//As many of these as you need...
 engine.accept(m);
 ```
 
-## Run static analyses
+## Technical notes
+
+### Logging
+
+This project uses [SLF4J](http://www.slf4j.org/) for logging.
+The logs will be printed on the terminal (```stderr```).
+To change this, you need to update ```pom.xml```.
+Find the below section and change it according to the
+[SLF4J instructions](http://www.slf4j.org/manual.html#swapping).
+```
+        <!--  Defines where slf4j logs should be directed -->
+        <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-simple</artifactId>
+          <version>1.7.16</version>
+        </dependency>
+```
+
+### Run static analyses
 
 To see if the updated code has any issues according to PMD or Findbugs, run
 ```

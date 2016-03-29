@@ -78,7 +78,7 @@ with a full example configuration.
 
 At its core, the inference of the Iot-Streams Inspector maintains
 an inferred state per C-SPARQL query. 
-When the query emits a new window of results,
+When the query yields a new set of results (corresponding to a time window),
 the associated SPARQL update queries will be executed
 in a graph that contains
   * The ontology
@@ -88,7 +88,7 @@ in a graph that contains
 If any new triples are added by the SPARQL update queries,
 these will make up the new state.
 
-When your C-SPARQL query emits its first window of results,
+When your C-SPARQL query yields its first set of results,
 there will be no previous state.
 This is called a "coldstart" and the associated set of SPARQL update
 queries will be executed. If no new triples are added to the graph,
@@ -96,7 +96,7 @@ the next window of results will also be handled by the "coldstart"
 SPARQL update queries.
 When the updates finally add new triple to a graph,
 these triples will become the first inferred state for the
-C-SPARQL query, and all subsequent result windows emitted
+C-SPARQL query, and all subsequent results sets yielded
 by the query will be handled by the "warm" SPARQL update queries.
 Ever time new triples are added by SPARQL qupte queries - coldstart
 or warm - the triples will be passed to the project-specific Java

@@ -31,7 +31,7 @@ import eu.larkc.csparql.core.ResultFormatter;
  * @author nhc
  *
  * An IotStreamsFormatter listens to one C-SPARQL query.
- * When the query emits a result (i.e. triples for one window),
+ * When the query yields a result set (i.e. triples for one window),
  * the IotStreamsFormatter executes the registered SPARQL updates
  * and handles results.
  */
@@ -43,14 +43,14 @@ class IotStreamsFormatter extends ResultFormatter {
     private EnumMap<Stage, HashMap<String, String>> sparqlUpdateQueries =
             new EnumMap<Stage, HashMap<String, String>>(Stage.class);
 
-    /** Model containing the ontology */
-    private Optional<OntModel> plan = Optional.empty();
+    /** Model containing the ontology/static knowledge */
+    private Optional<OntModel> staticKnowledge = Optional.empty();
 
     /** Model storing the received triples along with the ontology */
     private Optional<OntModel> m = Optional.empty();
 
     /** Model containing the latest inferred triples */
-    private Optional<Model> oldProv = Optional.empty();
+    private Optional<Model> lastInference = Optional.empty();
 
     /** Final resting place for inferred triples */
     private final Consumer<Model> inferredTripleConsumer;
@@ -71,14 +71,14 @@ class IotStreamsFormatter extends ResultFormatter {
     }
     
     /**
-     * Called when C-Sparql emits a window.
+     * Called when C-Sparql yields a set of results from the assoaciated C-SPARQL query.
      * Adds all triples to the internal model, then runs infer().
      */
     @Override
     public synchronized void update(final Observable ignored, final Object rdfTableUntyped) {
         final RDFTable rdfTable = (RDFTable) rdfTableUntyped;
         this.m = Optional.of(ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM_RDFS_INF));
-        this.m.get().add(this.plan.get());
+        this.m.get().add(this.staticKnowledge.get());
         rdfTable.stream()
             .map(this::convert)
             .forEach(s -> this.m.get().add(s));
@@ -115,27 +115,27 @@ class IotStreamsFormatter extends ResultFormatter {
      * Runs coldstart or warm SPARQL queries, updating Jena models as appropriate.
      */
     private void infer() {
-        final Model provmod = ModelFactory.createDefaultModel();
-        final long s = provmod.size();
-        provmod.add(this.m.get());
-        if (this.oldProv.isPresent()) {
+        final Model workingCopy = ModelFactory.createDefaultModel();
+        final long s = workingCopy.size();
+        workingCopy.add(this.m.get());
+        if (this.lastInference.isPresent()) {
             //Use inferred triples from latest successful inference
-            provmod.add(this.oldProv.get());
+            workingCopy.add(this.lastInference.get());
             this.sparqlUpdateQueries.get(Stage.WARM)
-                .forEach((name, query) -> update(name, query, provmod));
-            provmod.remove(this.m.get());
-            provmod.remove(this.oldProv.get());
-            if (provmod.size() > s) { //we inferred something
-                this.oldProv = Optional.of(provmod);
-                this.inferredTripleConsumer.accept(provmod);
+                .forEach((name, query) -> update(name, query, workingCopy));
+            workingCopy.remove(this.m.get());
+            workingCopy.remove(this.lastInference.get());
+            if (workingCopy.size() > s) { //we inferred something
+                this.lastInference = Optional.of(workingCopy);
+                this.inferredTripleConsumer.accept(workingCopy);
             }
         } else { //First run
             this.sparqlUpdateQueries.get(Stage.COLDSTART)
-                .forEach((name, query) -> update(name, query, provmod));
-            provmod.remove(this.m.get());
-            if (provmod.size() > s) { //we inferred something
-                this.oldProv = Optional.of(provmod);
-                this.inferredTripleConsumer.accept(provmod);
+                .forEach((name, query) -> update(name, query, workingCopy));
+            workingCopy.remove(this.m.get());
+            if (workingCopy.size() > s) { //we inferred something
+                this.lastInference = Optional.of(workingCopy);
+                this.inferredTripleConsumer.accept(workingCopy);
             } else { //No inference - error
                 Logging.warn(String.format("The coldstart SPARQL for %s did not infer anything", this.queryName));
             }
@@ -179,8 +179,8 @@ class IotStreamsFormatter extends ResultFormatter {
      * @param ontology Ontology, in TTL
      */
     public void setOntology(final String ontology) {
-        this.plan = Optional.of(ModelFactory.createOntologyModel());
-        plan.get().read(new ByteArrayInputStream(ontology.getBytes(StandardCharsets.ISO_8859_1)), null, "TTL");
+        this.staticKnowledge = Optional.of(ModelFactory.createOntologyModel());
+        staticKnowledge.get().read(new ByteArrayInputStream(ontology.getBytes(StandardCharsets.ISO_8859_1)), null, "TTL");
     }
     
     /**

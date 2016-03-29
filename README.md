@@ -97,7 +97,9 @@ engine.apply(...timestamp...).accept(model)
 to set a specific time stamp.
 
 *Remark*: Your program may construct any number of instances of 
-```uk.ac.abdn.iotstreams.csparql.IotStreamsEngine```
+```
+uk.ac.abdn.iotstreams.csparql.IotStreamsEngine
+```
 (although this has not been tested).
 The instances will use the same configuration files but but will be
 completely independt wrt. the data your program provides to each of them.

@@ -57,7 +57,7 @@ class IotStreamsFormatter extends ResultFormatter {
 
     /**
      * Registers the query name and prepares for configuration by
-     * addSparql() and setOwl()
+     * addSparql() and setOntology()
      * @param queryName Name picked up from directory - used for logging
      * @param persistentModel All inferred provenance will be passed to this object
      */

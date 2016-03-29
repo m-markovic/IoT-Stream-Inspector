@@ -28,7 +28,7 @@ final class Configurator {
     private static final Charset ISO88591 = Charset.forName("ISO-8859-1");
 
     private static final String QUERY_FILE = "csparql-query.rq";
-    private static final String OWL_FILE = "init.ttl";
+    private static final String ONTOLOGY_FILE = "init.ttl";
     
     /** Root of all configuration files */
     private static final Path CONFIG_ROOT = Paths.get("config/iotstreams/");
@@ -71,7 +71,7 @@ final class Configurator {
         if (rel.getNameCount() == 2 && rel.getFileName().toString().equals(QUERY_FILE)) {
             //<CONFIG_ROOT>/<name>/csparql-query.rq: A C-SPARQL query
             this.registerQuery(rel.getName(0), content);
-        } else if (rel.getNameCount() == 2 && rel.getFileName().toString().equals(OWL_FILE)) {
+        } else if (rel.getNameCount() == 2 && rel.getFileName().toString().equals(ONTOLOGY_FILE)) {
             //<CONFIG_ROOT>/<name>/init.ttl: A TTL ontology for initializing our Jena model
             formatter(rel.getName(0)).setOntology(content);
         } else if (rel.getNameCount() == 3 && rel.getFileName().toString().endsWith(".rq")) {

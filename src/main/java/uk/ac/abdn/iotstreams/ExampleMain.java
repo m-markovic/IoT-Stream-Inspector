@@ -1,6 +1,7 @@
 package uk.ac.abdn.iotstreams;
 
 import java.io.ByteArrayInputStream;
+import java.io.UnsupportedEncodingException;
 import java.time.ZonedDateTime;
 
 import com.hp.hpl.jena.rdf.model.Model;
@@ -83,7 +84,12 @@ public final class ExampleMain {
      */
     private static Model parseN3(final String n3) {
         final Model m = ModelFactory.createDefaultModel();
-        m.read(new ByteArrayInputStream(n3.getBytes()), null, "N3");
+        try {
+            m.read(new ByteArrayInputStream(n3.getBytes("ISO-8859-1")), null, "N3");
+        } catch (final UnsupportedEncodingException e) {
+            System.out.println("Expected ISO-8859-1 to be supported, try changing it to anothe charset");
+            System.exit(1);
+        }
         return m;
     }
 

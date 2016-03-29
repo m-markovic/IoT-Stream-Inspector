@@ -102,7 +102,7 @@ uk.ac.abdn.iotstreams.csparql.IotStreamsEngine
 ```
 (although this has not been tested).
 The instances will use the same configuration files but but will be
-completely independt wrt. the data your program provides to each of them.
+completely independent wrt. the data your program provides to each of them.
 
 Below are examples of use with recorded or live data.
 The full examples can be seen in ```src/main/java/uk/ac/abdn/iotstreams/ExampleMain.java```

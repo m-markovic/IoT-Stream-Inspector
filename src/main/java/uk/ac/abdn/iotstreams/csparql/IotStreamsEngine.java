@@ -90,7 +90,8 @@ public final class IotStreamsEngine
     }
     
     /**
-     * To add a Jena Model for a given timestamp, use engine.apply(t).accept(model)
+     * Utility method for specifying a timestamp to assoaciate with a Jena Model.
+     * Usage: engine.apply(myTimeStamp).accept(myModel)
      */
     @Override
     public Consumer<Model> apply(final ZonedDateTime t) {
@@ -98,7 +99,7 @@ public final class IotStreamsEngine
     }
     
     /**
-     * To add a Jena Model for the current time (i.e. NOW), use engine.accept(model)
+     * Add a Jena Model for the current time (i.e. NOW)
      */
     @Override
     public void accept(final Model m) {

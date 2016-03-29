@@ -34,7 +34,7 @@ public final class IotStreamsEngine
     private final RdfStream rdfStream = new RdfStream("http://iotstreams");
     
     /** Object to which all inferences will be passed */
-    private final Consumer<Model> persistentModel;
+    private final Consumer<Model> inferredTripleConsumer;
     
     /** Number of quadruples put on stream so far */
     private long numQuads = 0;
@@ -42,12 +42,12 @@ public final class IotStreamsEngine
     /**
      * Verifies that C-SPARQL is configured for using recorded data,
      * then returns an IotStreamsEngine.
-     * @param inferredDataConsumer Object to which all inferences will be passed
+     * @param inferredTripleConsumer Object to which all inferences will be passed
      * @return A fresh instance of IotStreamsEngine
      */
-    public static IotStreamsEngine forRecordedData(final Consumer<Model> inferredDataConsumer) {
+    public static IotStreamsEngine forRecordedData(final Consumer<Model> inferredTripleConsumer) {
         if (Config.INSTANCE.isEsperUsingExternalTimestamp()) {
-            return new IotStreamsEngine(inferredDataConsumer);
+            return new IotStreamsEngine(inferredTripleConsumer);
         } else {
             throw IotStreamsException.configurationError(
                     "To use recorded data, csparql.properties must contain the line "
@@ -73,13 +73,13 @@ public final class IotStreamsEngine
     
     /**
      * Initializes this engine.
-     * @param persistentModel Object to which all inferences will be passed
+     * @param inferredTripleConsumer Object to which all inferences will be passed
      */
-    private IotStreamsEngine(final Consumer<Model> persistentModel) {
-        this.persistentModel = persistentModel;
+    private IotStreamsEngine(final Consumer<Model> inferredTripleConsumer) {
+        this.inferredTripleConsumer = inferredTripleConsumer;
         this.initialize();
         this.registerStream(this.rdfStream);
-        new Configurator(this, this.persistentModel);
+        new Configurator(this, this.inferredTripleConsumer);
     }
     
     /**

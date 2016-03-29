@@ -49,21 +49,21 @@ class IotStreamsFormatter extends ResultFormatter {
     /** Model storing the received triples along with the ontology */
     private Optional<OntModel> m = Optional.empty();
 
-    /** Model containing the latest provenance found */
+    /** Model containing the latest inferred triples */
     private Optional<Model> oldProv = Optional.empty();
 
-    /** Final resting place for inferred provenance */
-    private final Consumer<Model> persistentModel;
+    /** Final resting place for inferred triples */
+    private final Consumer<Model> inferredTripleConsumer;
 
     /**
      * Registers the query name and prepares for configuration by
      * addSparql() and setOntology()
      * @param queryName Name picked up from directory - used for logging
-     * @param persistentModel All inferred provenance will be passed to this object
+     * @param inferredTripleConsumer All inferred triples will be passed to this object
      */
-    IotStreamsFormatter(final String queryName, final Consumer<Model> persistentModel) {
+    IotStreamsFormatter(final String queryName, final Consumer<Model> inferredTripleConsumer) {
         this.queryName = queryName;
-        this.persistentModel = persistentModel;
+        this.inferredTripleConsumer = inferredTripleConsumer;
         //Initialize SPARQL update query collections
         for (Stage s : Stage.values()) {
             this.sparqlUpdateQueries.put(s, new HashMap<String, String>());
@@ -119,7 +119,7 @@ class IotStreamsFormatter extends ResultFormatter {
         final long s = provmod.size();
         provmod.add(this.m.get());
         if (this.oldProv.isPresent()) {
-            //Note: this modification needs to happen before updating oldProv and persistentModel
+            //Use inferred triples from latest successful inference
             provmod.add(this.oldProv.get());
             this.sparqlUpdateQueries.get(Stage.WARM)
                 .forEach((name, query) -> update(name, query, provmod));
@@ -127,7 +127,7 @@ class IotStreamsFormatter extends ResultFormatter {
             provmod.remove(this.oldProv.get());
             if (provmod.size() > s) { //we inferred something
                 this.oldProv = Optional.of(provmod);
-                this.persistentModel.accept(provmod);
+                this.inferredTripleConsumer.accept(provmod);
             }
         } else { //First run
             this.sparqlUpdateQueries.get(Stage.COLDSTART)
@@ -135,7 +135,7 @@ class IotStreamsFormatter extends ResultFormatter {
             provmod.remove(this.m.get());
             if (provmod.size() > s) { //we inferred something
                 this.oldProv = Optional.of(provmod);
-                this.persistentModel.accept(provmod);
+                this.inferredTripleConsumer.accept(provmod);
             } else { //No inference - error
                 Logging.warn(String.format("The coldstart SPARQL for %s did not infer anything", this.queryName));
             }
@@ -187,9 +187,9 @@ class IotStreamsFormatter extends ResultFormatter {
      * Stages in which SPARQL update queries are executed
      */
     private enum Stage {
-      /** Coldstart: No provenance has been inferred yet */
+      /** Coldstart: Nothing has been inferred yet */
       COLDSTART,
-      /** Warm: Provenance has already been inferred */
+      /** Warm: Some triples have already been inferred */
       WARM;
     };
 }

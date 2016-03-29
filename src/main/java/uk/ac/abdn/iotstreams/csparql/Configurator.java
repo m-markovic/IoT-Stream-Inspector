@@ -39,17 +39,17 @@ final class Configurator {
     /** Observer for each query */
     private Map<String, IotStreamsFormatter> observers = new HashMap<>();
 
-    /** The persistent model to add inferred provenance to */
-    private final Consumer<Model> persistentModel;
+    /** The persistent model to add inferred triples to */
+    private final Consumer<Model> inferredTripleConsumer;
     
     /**
      * Registers the engine to configure
      * @param engine The engine to configure
-     * @param persistentModel The object to pass inferred provenance to
+     * @param inferredTripleConsumer The object to pass inferred triples to
      */
-    public Configurator(final CsparqlEngine engine, final Consumer<Model> persistentModel) {
+    public Configurator(final CsparqlEngine engine, final Consumer<Model> inferredTripleConsumer) {
         this.engine = engine;
-        this.persistentModel = persistentModel;
+        this.inferredTripleConsumer = inferredTripleConsumer;
         try {
             Files.walk(CONFIG_ROOT)
                 .filter(Files::isRegularFile)
@@ -104,7 +104,7 @@ final class Configurator {
     private IotStreamsFormatter formatter(final Path nameAsPath) {
         final String name = nameAsPath.toString();
         if (!this.observers.containsKey(name)){
-            this.observers.put(name, new IotStreamsFormatter(name, this.persistentModel));
+            this.observers.put(name, new IotStreamsFormatter(name, this.inferredTripleConsumer));
         }
         return this.observers.get(name.toString());
     }

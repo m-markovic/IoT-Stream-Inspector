@@ -98,7 +98,8 @@ The full examples can be seen in ```src/main/java/uk/ac/abdn/iotstreams/ExampleM
 When using recorded data, you will likely want to provide
 the original time stamps and make C-SPARQL use these for
 making time windows. First make sure 
-```esper.externaltime.enabled=true
+```
+esper.externaltime.enabled=true
 ```
 in ``` csparql.properties ```
 (see above) then follow this pattern:
@@ -114,7 +115,8 @@ engine.apply(t).accept(parseN3("<http://example> <http://answer> 42"));
 When using live data, you will likely want to use current time
 and allow C-SPARQL to use this for
 making time windows. First make sure 
-```esper.externaltime.enabled=false
+```
+esper.externaltime.enabled=false
 ```
 in ``` csparql.properties ```
 (see above) then follow this pattern:

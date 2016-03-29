@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class Logging {
     /** All application-specific logging will be associated with this class. */
-    private static final Logger logger = LoggerFactory.getLogger("IoT-streams");
+    private static final Logger logger = LoggerFactory.getLogger("IoT-stream");
 
     /**
      * Log msg on level warn

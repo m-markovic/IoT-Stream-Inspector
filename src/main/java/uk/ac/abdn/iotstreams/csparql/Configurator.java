@@ -65,7 +65,7 @@ final class Configurator {
      * @param file A file in the configuration dir.
      */
     private void addFile(final Path file) {
-        Logging.info(file.toString());
+        Logging.info(String.format("Loading %s...", file.toString()));
         final String content = read(file);
         final Path rel = CONFIG_ROOT.relativize(file);
         if (rel.getNameCount() == 2 && rel.getFileName().toString().equals(QUERY_FILE)) {
